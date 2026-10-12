@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -e
+
+undivert() {
+    dpkg-divert --package pve-trafficd --remove --rename \
+        --divert "$1.pve-trafficd-orig" "$1" >/dev/null
+}
+
+case "$1" in
+    remove|abort-install|disappear)
+        undivert /usr/share/perl5/PVE/API2/Cluster.pm
+        ;;
+    purge)
+        rm -rf /var/lib/pve-trafficd /run/pve-trafficd
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

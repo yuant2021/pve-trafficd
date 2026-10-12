@@ -1,0 +1,8 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use PVE::CLI::pve_traffic;
+
+PVE::CLI::pve_traffic->run_cli_handler();

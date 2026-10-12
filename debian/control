@@ -1,0 +1,30 @@
+Source: pve-trafficd
+Section: admin
+Priority: optional
+Maintainer: yuant <me@yuant.cc>
+Build-Depends: debhelper-compat (= 13), libjson-perl, libpve-common-perl (>= 9.0)
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+
+Package: pve-trafficd
+Architecture: all
+Depends: iproute2,
+         libjson-perl,
+         libpve-cluster-perl,
+         libpve-common-perl (>= 9.0),
+         pve-manager (>= 9.0),
+         qemu-server (>= 9.0),
+         ${misc:Depends},
+         ${perl:Depends},
+Description: traffic accounting and quota rate limits for Proxmox VE virtual machines
+ Counts the traffic of each network device of QEMU virtual machines since its
+ last reset. When the counted traffic reaches the quota of the device, its
+ rate in the VM configuration is set to a configurable limit rate; a reset
+ restores the original rate.
+ .
+ Counters and settings are kept cluster-wide per VMID and network device: they
+ survive the VM being destroyed and re-created (reinstall), follow migrations,
+ and include the traffic up to the very end when a VM or the host shuts down.
+ .
+ Adds a Traffic page to the Datacenter and VM views of the web interface and
+ the /cluster/trafficd API, e.g. for billing systems doing the periodic reset.

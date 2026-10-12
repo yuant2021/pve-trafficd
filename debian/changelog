@@ -1,0 +1,9 @@
+pve-trafficd (1.0.0) trixie; urgency=medium
+
+  * Initial release: per network device traffic accounting of Proxmox VE
+    virtual machines since the last reset, quota with automatic rate limit
+    through the NIC rate of the VM config, cluster-wide data that survives VM
+    re-creation and follows migrations, final counters on guest and host
+    shutdown, API (/cluster/trafficd), CLI (pve-traffic) and web UI pages.
+
+ -- yuant <me@yuant.cc>  Mon, 12 Oct 2026 14:15:48 +0800

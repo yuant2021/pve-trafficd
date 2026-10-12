@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+# pve-trafficd ships a wrapper for this module, the original is diverted next
+# to it and loaded by the wrapper (see src/divert/).
+divert() {
+    dpkg-divert --package pve-trafficd --add --rename \
+        --divert "$1.pve-trafficd-orig" "$1" >/dev/null
+}
+
+case "$1" in
+    install|upgrade)
+        divert /usr/share/perl5/PVE/API2/Cluster.pm
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

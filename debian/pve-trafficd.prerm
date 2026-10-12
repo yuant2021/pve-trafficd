@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -e
+
+#DEBHELPER#
+
+case "$1" in
+    remove|deconfigure)
+        # pve-trafficd is stopped by now (counters written out): restore the
+        # original rates of limited guests on this node
+        if [ -d /run/systemd/system ]; then
+            pve-traffic cleanup || true
+        fi
+        /usr/share/pve-trafficd/index-patch revert || true
+        ;;
+esac
+
+exit 0

@@ -1,0 +1,15 @@
+[Unit]
+Description=Proxmox VE traffic accounting daemon
+Wants=pve-cluster.service
+After=pve-cluster.service
+# Stopped only after all guests: the final counters of a guest arrive when its
+# tap devices go away, also on host shutdown.
+Before=pve-guests.service pve-ha-lrm.service qemu.slice
+
+[Service]
+ExecStart=/usr/sbin/pve-trafficd
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
