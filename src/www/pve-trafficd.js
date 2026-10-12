@@ -53,17 +53,29 @@ PVE.trafficd.Utils = {
         return Ext.isNumeric(value) ? Proxmox.Utils.render_timestamp(value) : '';
     },
 
+    // grid columns: the date, the full time is in the tooltip
+    renderDate: function (value, metaData) {
+        if (!Ext.isNumeric(value)) {
+            return '';
+        }
+        metaData.tdAttr = `data-qtip="${Proxmox.Utils.render_timestamp(value)}"`;
+        return Ext.Date.format(new Date(value * 1000), 'Y-m-d');
+    },
+
     renderUsage: function (value, metaData, record) {
         let data = record.data;
         if (!data.configured) {
             return '';
         }
+        let counted = PVE.trafficd.Utils.renderDirection(data['effective-direction']);
+        metaData.tdAttr = `data-qtip="${Ext.htmlEncode(gettext('Counted traffic') + ': ' + counted)}"`;
         let used = Proxmox.Utils.format_size(data.used ?? 0);
         if (!Ext.isNumeric(data.quota)) {
             return `${used} / -`;
         }
         let percent = data.quota > 0 ? (100 * data.used) / data.quota : 100;
-        let res = `${used} / ${Proxmox.Utils.format_size(data.quota)} (${percent.toFixed(1)}%)`;
+        let digits = percent < 10 ? 1 : 0;
+        let res = `${used} / ${Proxmox.Utils.format_size(data.quota)} (${percent.toFixed(digits)}%)`;
         if (percent >= 100) {
             res = `<span class="critical">${res}</span>`;
         } else if (percent >= 80) {
@@ -593,64 +605,64 @@ Ext.define('PVE.trafficd.GuestPanel', {
                 {
                     header: gettext('Device'),
                     dataIndex: 'net',
-                    width: 75,
+                    width: 70,
                     renderer: PVE.trafficd.Utils.renderNic,
                 },
                 {
                     header: gettext('Bridge'),
                     dataIndex: 'bridge',
-                    width: 75,
+                    width: 65,
                     renderer: Ext.htmlEncode,
                 },
                 {
                     header: gettext('Usage'),
                     dataIndex: 'used',
-                    flex: 2,
-                    minWidth: 190,
+                    flex: 1,
+                    minWidth: 195,
                     renderer: PVE.trafficd.Utils.renderUsage,
                 },
                 {
                     header: gettext('In'),
                     dataIndex: 'netin',
-                    width: 85,
+                    width: 80,
                     renderer: PVE.trafficd.Utils.renderBytes,
                 },
                 {
                     header: gettext('Out'),
                     dataIndex: 'netout',
-                    width: 85,
+                    width: 80,
                     renderer: PVE.trafficd.Utils.renderBytes,
                 },
                 {
                     header: gettext('Counted'),
                     dataIndex: 'effective-direction',
-                    width: 100,
+                    width: 75,
                     renderer: PVE.trafficd.Utils.renderDirectionShort,
                 },
                 {
                     header: gettext('Limit rate'),
                     dataIndex: 'effective-rate',
-                    width: 85,
+                    width: 80,
                     renderer: PVE.trafficd.Utils.renderRate,
                 },
                 {
                     header: gettext('NIC rate'),
                     dataIndex: 'nic-rate',
-                    width: 85,
+                    width: 80,
                     renderer: (value, metaData, rec) =>
                         rec.data.missing ? '' : PVE.trafficd.Utils.renderRate(value ?? 0),
                 },
                 {
                     header: gettext('Last reset'),
                     dataIndex: 'last-reset',
-                    width: 150,
-                    renderer: PVE.trafficd.Utils.renderTime,
+                    width: 90,
+                    renderer: PVE.trafficd.Utils.renderDate,
                 },
                 {
                     header: gettext('Status'),
                     dataIndex: 'limited',
-                    flex: 2,
-                    minWidth: 170,
+                    flex: 1,
+                    minWidth: 160,
                     cellWrap: true,
                     renderer: PVE.trafficd.Utils.renderStatus,
                 },
@@ -856,14 +868,14 @@ Ext.define('PVE.trafficd.ClusterNicGrid', {
                 {
                     header: 'VMID',
                     dataIndex: 'vmid',
-                    width: 70,
+                    width: 60,
                 },
                 {
                     header: gettext('Name'),
                     // not a model field: sorting by VMID must not mark this column
                     dataIndex: 'name',
                     flex: 1,
-                    minWidth: 90,
+                    minWidth: 80,
                     sortable: false,
                     renderer: (value, meta, rec) =>
                         rec.data.orphan
@@ -873,56 +885,44 @@ Ext.define('PVE.trafficd.ClusterNicGrid', {
                 {
                     header: gettext('Node'),
                     dataIndex: 'node',
-                    width: 80,
+                    width: 70,
                     renderer: Ext.htmlEncode,
                 },
                 {
                     header: gettext('Device'),
                     dataIndex: 'net',
-                    width: 65,
+                    width: 70,
                 },
                 {
                     header: gettext('Usage'),
                     dataIndex: 'used',
                     flex: 2,
-                    minWidth: 190,
+                    minWidth: 175,
                     renderer: PVE.trafficd.Utils.renderUsage,
                 },
                 {
                     header: gettext('In'),
                     dataIndex: 'netin',
-                    width: 85,
+                    width: 80,
                     renderer: PVE.trafficd.Utils.renderBytes,
                 },
                 {
                     header: gettext('Out'),
                     dataIndex: 'netout',
-                    width: 85,
+                    width: 80,
                     renderer: PVE.trafficd.Utils.renderBytes,
-                },
-                {
-                    header: gettext('Counted'),
-                    dataIndex: 'effective-direction',
-                    width: 100,
-                    renderer: PVE.trafficd.Utils.renderDirectionShort,
-                },
-                {
-                    header: gettext('Limit rate'),
-                    dataIndex: 'effective-rate',
-                    width: 85,
-                    renderer: PVE.trafficd.Utils.renderRate,
                 },
                 {
                     header: gettext('Last reset'),
                     dataIndex: 'last-reset',
-                    width: 150,
-                    renderer: PVE.trafficd.Utils.renderTime,
+                    width: 90,
+                    renderer: PVE.trafficd.Utils.renderDate,
                 },
                 {
                     header: gettext('Status'),
                     dataIndex: 'limited',
                     flex: 2,
-                    minWidth: 170,
+                    minWidth: 150,
                     cellWrap: true,
                     renderer: PVE.trafficd.Utils.renderStatus,
                 },
